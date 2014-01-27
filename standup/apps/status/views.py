@@ -12,7 +12,25 @@ from standup.apps.users.models import Team, User
 from standup.database import get_session
 from standup.errors import forbidden, page_not_found
 from standup.filters import format_update
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.expression import ColumnClause
 
+
+# Extract Year+WeekOfYear from a given date column.
+class WeekColumnClause(ColumnClause):
+    pass
+
+@compiles(WeekColumnClause, 'sqlite')
+def compile_week_column(element, compiler, **kw):
+    return "strftime('%%Y%%W', %s)" % element.name
+
+@compiles(WeekColumnClause, 'postgresql')
+def compile_week_column(element, compiler, **kw):
+    return "to_char(%s, 'YYYYWW')" % element.name
+
+@compiles(WeekColumnClause, 'mysql')
+def compile_week_column(element, compiler, **kw):
+    return "DATE_FORMAT(%s, '%%Y%%V')" % element.name
 
 blueprint = Blueprint('status', __name__)
 
@@ -58,6 +76,24 @@ def index():
             request.args.get('page', 1),
             startdate(request),
             enddate(request)),)
+
+@blueprint.route('/weekly')
+def weekly():
+    """The home page."""
+    db = get_session(current_app)
+
+    #select id, user_id, created, strftime('%Y%W', created), date(created, 'weekday 1'), content from status order by 4, 2, 3;
+    return render_template(
+        'status/weekly.html',
+        statuses=paginate(
+            db.query(Status).filter_by(reply_to=None).order_by(
+                desc(WeekColumnClause("created")), # TODO: check dialect and insert the proper db-specific SQL
+                Status.user_id,
+                desc(Status.created)),
+            request.args.get('page', 1),
+            startdate(request),
+            enddate(request),
+            per_page=100),)
 
 
 @blueprint.route('/statuses.xml')
