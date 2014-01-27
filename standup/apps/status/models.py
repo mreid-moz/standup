@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import current_app
 from sqlalchemy import (asc, Column, DateTime, desc, ForeignKey, Integer,
@@ -70,6 +70,18 @@ class Status(Model):
     def reply_count(self):
         db = get_session(current_app)
         return db.query(Status).filter(Status.reply_to_id == self.id).count()
+
+    @property
+    def week_start(self):
+        if self.created:
+            return self.created - timedelta(self.created.isoweekday() - 1)
+        return None
+
+    @property
+    def week_end(self):
+        if self.created:
+            return self.created + timedelta(7 - self.created.isoweekday())
+        return None
 
     def dictify(self, trim_user=False, trim_project=False):
         """Returns an OrderedDict of model attributes"""
