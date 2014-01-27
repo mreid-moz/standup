@@ -50,7 +50,9 @@ def get_weeks(num_weeks=10):
     weeks = []
     current = datetime.now()
     for i in range(num_weeks):
-        weeks.append({"start_date": week_start(current), "weeks_ago": i})
+        weeks.append({"start_date": week_start(current), \
+            "end_date": week_end(current), \
+            "weeks_ago": i })
         current = current - timedelta(7)
     return weeks
 

@@ -57,13 +57,7 @@
                 {% for week in weeks %}
                 <li>
                   <a href="{{ url_for('status.weekly', week=week.start_date.date()|dateformat('%Y-%m-%d')) }}">
-                  {% if week.weeks_ago == 0 %}
-                    This Week
-                  {% elif week.weeks_ago == 1 %}
-                    Last Week
-                  {% else %}
-                    {{ week.weeks_ago }} Weeks Ago
-                  {% endif %}
+                   {{week.start_date.date()|dateformat('%b %d')}} to {{ week.end_date.date()|dateformat('%b %d %Y') }}
                   </a>
                 </li>
                 {% endfor %}
