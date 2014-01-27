@@ -44,3 +44,20 @@ def isday(day):
 
 def get_day(day):
     return datetime.strptime(day, '%Y-%m-%d')
+
+
+def get_weeks(num_weeks=10):
+    weeks = []
+    current = datetime.now()
+    for i in range(num_weeks):
+        weeks.append({"start_date": week_start(current), "weeks_ago": i})
+        current = current - timedelta(7)
+    return weeks
+
+
+def week_start(d):
+    return d - timedelta(d.isoweekday() - 1)
+
+
+def week_end(d):
+    return d + timedelta(7 - d.isoweekday())

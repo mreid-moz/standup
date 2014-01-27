@@ -6,6 +6,8 @@ from sqlalchemy import (asc, Column, DateTime, desc, ForeignKey, Integer,
 from sqlalchemy.orm import backref, relationship
 from standup import OrderedDict
 from standup.apps.status.helpers import paginate
+from standup.apps.status.helpers import week_start as h_week_start
+from standup.apps.status.helpers import week_end as h_week_end
 from standup.database import get_session
 from standup.database.classes import Model
 from standup.filters import format_update
@@ -74,13 +76,13 @@ class Status(Model):
     @property
     def week_start(self):
         if self.created:
-            return self.created - timedelta(self.created.isoweekday() - 1)
+            return h_week_start(self.created)
         return None
 
     @property
     def week_end(self):
         if self.created:
-            return self.created + timedelta(7 - self.created.isoweekday())
+            return h_week_end(self.created)
         return None
 
     def dictify(self, trim_user=False, trim_project=False):
