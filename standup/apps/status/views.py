@@ -6,7 +6,7 @@ from urlparse import urljoin
 from werkzeug.contrib.atom import AtomFeed
 
 from sqlalchemy import desc
-from standup.apps.status.helpers import enddate, paginate, startdate, get_weeks
+from standup.apps.status.helpers import enddate, paginate, startdate
 from standup.apps.status.models import Project, Status
 from standup.apps.users.models import Team, User
 from standup.database import get_session
@@ -70,7 +70,6 @@ def index():
 
     return render_template(
         'status/index.html',
-        weeks=get_weeks(),
         statuses=paginate(
             db.query(Status).filter_by(reply_to=None).order_by(
                 desc(Status.created)),
@@ -86,7 +85,6 @@ def weekly():
     #select id, user_id, created, strftime('%Y%W', created), date(created, 'weekday 1'), content from status order by 4, 2, 3;
     return render_template(
         'status/weekly.html',
-        weeks=get_weeks(),
         statuses=paginate(
             db.query(Status).filter_by(reply_to=None).order_by(
                 desc(WeekColumnClause("created")),
