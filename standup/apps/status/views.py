@@ -7,30 +7,12 @@ from werkzeug.contrib.atom import AtomFeed
 
 from sqlalchemy import desc
 from standup.apps.status.helpers import enddate, paginate, startdate
-from standup.apps.status.models import Project, Status
+from standup.apps.status.models import Project, Status, WeekColumnClause
 from standup.apps.users.models import Team, User
 from standup.database import get_session
 from standup.errors import forbidden, page_not_found
 from standup.filters import format_update
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.sql.expression import ColumnClause
 
-
-# Extract Year+WeekOfYear from a given date column.
-class WeekColumnClause(ColumnClause):
-    pass
-
-@compiles(WeekColumnClause, 'sqlite')
-def compile_week_column(element, compiler, **kw):
-    return "strftime('%%Y%%W', %s)" % element.name
-
-@compiles(WeekColumnClause, 'postgresql')
-def compile_week_column(element, compiler, **kw):
-    return "to_char(%s, 'YYYYWW')" % element.name
-
-@compiles(WeekColumnClause, 'mysql')
-def compile_week_column(element, compiler, **kw):
-    return "DATE_FORMAT(%s, '%%Y%%V')" % element.name
 
 blueprint = Blueprint('status', __name__)
 
@@ -79,7 +61,7 @@ def index():
 
 @blueprint.route('/weekly')
 def weekly():
-    """The home page."""
+    """The weekly status page."""
     db = get_session(current_app)
 
     #select id, user_id, created, strftime('%Y%W', created), date(created, 'weekday 1'), content from status order by 4, 2, 3;
@@ -94,7 +76,6 @@ def weekly():
             startdate(request),
             enddate(request),
             per_page=100),)
-
 
 @blueprint.route('/statuses.xml')
 def index_feed():
