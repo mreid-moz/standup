@@ -29,7 +29,7 @@ def _get_timeline_params():
     params['trim_user'] = truthify(request.args.get('trim_user'))
     params['trim_project'] = truthify(request.args.get('trim_project'))
     params['include_replies'] = request.args.get('include_replies')
-    params['weekly'] = request.args.get('weekly')
+    params['weekly'] = truthify(request.args.get('weekly'))
 
     return params
 
@@ -127,13 +127,10 @@ def _handle_weekly(qs, params):
 
 def _get_data(statuses, params):
     data = []
-    include_week = False
-    if params['weekly']:
-        include_week=True
     for status in statuses:
         data.append(status.dictify(trim_user=params['trim_user'],
                                    trim_project=params['trim_project'],
-                                   include_week=include_week))
+                                   include_week=params['weekly']))
     return data
 
 @blueprint.route('/statuses/home_timeline.json', methods=['GET'])
