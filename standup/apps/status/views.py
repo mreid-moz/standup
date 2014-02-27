@@ -67,6 +67,7 @@ def weekly():
     #select id, user_id, created, strftime('%Y%W', created), date(created, 'weekday 1'), content from status order by 4, 2, 3;
     return render_template(
         'status/weekly.html',
+        week=request.args.get('week', None),
         statuses=paginate(
             db.query(Status).filter_by(reply_to=None).order_by(
                 desc(WeekColumnClause("created")),
